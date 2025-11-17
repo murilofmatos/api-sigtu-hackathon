@@ -9,9 +9,9 @@ export class AuthController {
    * Registra um novo usuário
    */
   static register = asyncHandler(async (req: Request, res: Response) => {
-    const { email, password, name } = req.body;
+    const { email, password, name, role } = req.body;
 
-    const result = await AuthService.register({ email, password, name });
+    const result = await AuthService.register({ email, password, name, role });
 
     res.status(201).json({
       success: true,
@@ -52,7 +52,7 @@ export class AuthController {
 
     const user = await AuthService.getUserByUid(uid);
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       data: user,
     });
@@ -75,9 +75,56 @@ export class AuthController {
 
       await AuthService.deleteUser(uid);
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         message: 'Conta deletada com sucesso',
+      });
+    }
+  );
+
+  /**
+   * POST /api/auth/resend-verification
+   * Reenvia o email de verificação
+   */
+  static resendVerificationEmail = asyncHandler(
+    async (req: Request, res: Response) => {
+      const { email } = req.body;
+
+      const verificationLink = await AuthService.resendVerificationEmail(email);
+
+      return res.status(200).json({
+        success: true,
+        message: 'Email de verificação enviado com sucesso',
+        // Apenas para desenvolvimento - remover em produção
+        data: {
+          verificationLink,
+        },
+      });
+    }
+  );
+
+  /**
+   * GET /api/auth/verify-status
+   * Verifica o status de verificação do email do usuário autenticado
+   */
+  static checkVerificationStatus = asyncHandler(
+    async (req: AuthRequest, res: Response) => {
+      const uid = req.user?.uid;
+
+      if (!uid) {
+        return res.status(401).json({
+          success: false,
+          message: 'Não autorizado',
+        });
+      }
+
+      const isVerified = await AuthService.checkEmailVerification(uid);
+
+      return res.status(200).json({
+        success: true,
+        data: {
+          emailVerified: isVerified,
+        },
       });
     }
   );

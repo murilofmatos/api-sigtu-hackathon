@@ -1,5 +1,7 @@
 import { Router } from 'express';
 import authRoutes from './authRoutes';
+import studentRoutes from './studentRoutes';
+import universityRoutes from './universityRoutes';
 
 const router = Router();
 
@@ -14,5 +16,11 @@ router.get('/health', (req, res) => {
 
 // Rotas de autenticação
 router.use('/auth', authRoutes);
+
+// Rotas de aluno
+router.use('/student', studentRoutes);
+
+// Rotas de universidades
+router.use('/universities', universityRoutes);
 
 export default router;
